@@ -16,9 +16,9 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
-import ProductCard from "../components/ProductCard";
-import ProductFormDialog from "../components/ProductFormDialog";
-import DeleteProductDialog from "../components/DeleteProductDialog";
+import ProductCard from "../../components/ProductCard";
+import ProductFormDialog from "../../components/ProductFormDialog";
+import DeleteProductDialog from "../../components/DeleteProductDialog";
 
 export default function ProductListPage({
   products,

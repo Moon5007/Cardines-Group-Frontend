@@ -5,7 +5,7 @@ import {
   DialogTitle, MenuItem, Snackbar, Stack, Table, TableBody, TableCell,
   TableHead, TableRow, TextField, Typography,
 } from "@mui/material";
-import api from "../api/axios";
+import api from "../../api/axios";
 
 const PAGE_SIZE = 5;
 const ROLES = ["customer", "admin"];

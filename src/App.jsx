@@ -1,15 +1,26 @@
 import { useCallback, useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import api from "./api/axios";
 
 import MainLayout from "./layouts/MainLayout";
-
-import ProductListPage from "./pages/ProductListPage";
-import ProductDetailsPage from "./pages/ProductDetailsPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import DashboardPage from "./pages/DashboardPage";
- import UsersPage from "./pages/UserPage";  
+// Admin pages
+import ProductListPage from "./pages/admin/ProductListPage";
+import ProductDetailsPage from "./pages/admin/ProductDetailsPage";
+import NotFoundPage from "./pages/admin/NotFoundPage";
+import DashboardPage from "./pages/admin/DashboardPage";
+import UsersPage from "./pages/admin/UserPage";
+import ReviewsPage from "./pages/admin/ReviewsPage";
+import CategoriesPage from "./pages/admin/CategoriesPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+// User pages
+import UserDashboardPage from "./pages/User/UserDashboardPage";
+import LoginPage from "./pages/user/LoginPage";
+import RegisterPage from "./pages/user/RegisterPage";
+import CartPage from "./pages/user/CartPage";
+import AdminRoute from "./components/AdminRoute";
+import ShopPage from "./pages/user/ShopPage";
+import OrderPage from "./pages/user/OrderPage";
 
 // Pulls the item out of either { data: {...} } or {...}
 const unwrap = (response) => response.data?.data ?? response.data;
@@ -57,8 +68,7 @@ export default function App() {
     setProducts((current) => [...current, unwrap(response)]);
   }
 
-  // UPDATE: multipart can't be read on a real PATCH in PHP,
-  // so send POST with _method=PATCH (Laravel treats it as PATCH)
+  // UPDATE: send POST with _method=PATCH so PHP can read the multipart body
   async function updateProduct(id, values) {
     const fd = toFormData(values);
     fd.append("_method", "PATCH");
@@ -75,13 +85,34 @@ export default function App() {
     setProducts((current) => current.filter((p) => p.id !== id));
   }
 
-  return (
+   return (
     <Routes>
       <Route element={<MainLayout />}>
+        {/* Default route: user dashboard (public, guests can browse) */}
+        <Route path="/" element={<UserDashboardPage />} />
+        <Route path="/user" element={<Navigate to="/" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/order-history" element={<OrderPage />} />
 
-        {/* Product Catalog */}
+        {/* Product details */}
+        <Route path="/products/:id" element={<ProductDetailsPage />} />
+
+        {/* Admin pages */}
         <Route
-          path="/"
+            path="/dashboard"
+            element={
+              <AdminRoute>
+                <DashboardPage />
+              </AdminRoute>
+            }
+          />
+        <Route path="/users" element={<UsersPage />} />
+
+        <Route
+          path="/admin/products"
           element={
             <ProductListPage
               products={products}
@@ -94,15 +125,34 @@ export default function App() {
             />
           }
         />
-        {/* Dashboard */}
-        <Route path="/dashboard" element={<DashboardPage />} />
-         <Route path="/users" element={<UsersPage />} />
-        {/* Product Details (fetches its own data by id) */}
-        <Route path="/products/:id" element={<ProductDetailsPage />} />
+
+        <Route
+          path="/admin/categories"
+          element={
+            <AdminRoute>
+              <CategoriesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <AdminRoute>
+              <AdminOrdersPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/reviews"
+          element={
+            <AdminRoute>
+              <ReviewsPage />
+            </AdminRoute>
+          }
+        />
 
         {/* 404 Not Found */}
         <Route path="*" element={<NotFoundPage />} />
-
       </Route>
     </Routes>
   );

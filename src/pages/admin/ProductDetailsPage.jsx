@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 
 import { Link as RouterLink, useParams } from "react-router-dom";
-import api from "../api/axios";
+import api from "../../api/axios";
 
 // Format product price to Philippine Peso
 const formatPrice = (price) =>

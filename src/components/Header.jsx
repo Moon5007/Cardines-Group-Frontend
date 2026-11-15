@@ -1,25 +1,46 @@
 import { useState } from "react";
 import {
-  AppBar, Box, Button, Drawer, IconButton, List, ListItemButton, ListItemText,
+  AppBar, Box, Tooltip,  Button, Divider, Drawer, IconButton, List, ListItemButton, ListItemText,
   Toolbar, Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
+import api from "../api/axios";
 import logo from "../assets/images/myLogo.png";
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+const TEAL_DARK = "#0b5d57";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard" },
   { label: "Users", to: "/users" },
-  { label: "Products", to: "/" },
+  { label: "Products", to: "/admin/products" },
   { label: "Orders", to: "/orders" },
   { label: "Inventory", to: "/inventory" },
   { label: "Reviews", to: "/reviews" },
   { label: "Reports", to: "/reports" },
+  { label: "Categories", to: "/admin/categories" },
 ];
 
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  if (user?.role !== "admin") return null;
+
+  const logout = async () => {
+    try {
+      await api.post("/logout");
+    } catch {
+      // token may already be invalid; log out locally anyway
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.dispatchEvent(new Event("storage"));
+      navigate("/login", { replace: true });
+    }
+  };
 
   return (
     <>
@@ -31,7 +52,7 @@ export default function Header() {
           backdropFilter: "blur(16px) saturate(160%)",
           WebkitBackdropFilter: "blur(16px) saturate(160%)",
           borderBottom: "1px solid rgba(255,255,255,0.6)",
-          color: "#0b5d57",
+          color: TEAL_DARK,
         }}
       >
         {/* space-between: logo on the left, everything else on the far right edge */}
@@ -39,7 +60,7 @@ export default function Header() {
           {/* Logo */}
           <Box
             component={RouterLink}
-            to="/"
+            to="/dashboard"
             sx={{
               display: "flex",
               alignItems: "center",
@@ -63,8 +84,8 @@ export default function Header() {
 
           {/* Right edge */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {/* Desktop: links shown directly in the header */}
-            <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5 }}>
+            {/* Desktop: links + logout shown directly in the header */}
+            <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, alignItems: "center" }}>
               {navItems.map((item) => {
                 const active = pathname === item.to;
                 return (
@@ -86,6 +107,24 @@ export default function Header() {
                   </Button>
                 );
               })}
+
+            <Tooltip title="Logout" arrow>
+              <IconButton
+                variant="outlined"
+                size="small"
+                onClick={logout}
+                sx={{
+                  ml: 1,
+                  fontWeight: 700,
+                  borderRadius: 2,
+                  px: 1.5,
+                  borderColor: TEAL_DARK,
+                  color: TEAL_DARK,
+                }}
+              >
+                <LogoutRoundedIcon />
+              </IconButton>
+            </Tooltip>
             </Box>
 
             {/* Phone: burger on the far right edge */}
@@ -128,8 +167,8 @@ export default function Header() {
                 sx={{
                   mx: 1,
                   borderRadius: 2,
-                  color: "#0b5d57",
-                  "&.Mui-selected": { background: "linear-gradient(160deg, rgba(255,255,255,0.8), rgba(105,228,218,0.35))"},
+                  color: TEAL_DARK,
+                  "&.Mui-selected": { background: "linear-gradient(160deg, rgba(255,255,255,0.8), rgba(105,228,218,0.35))" },
                   "&:hover": { background: "rgba(105,228,218,0.35)" },
                   "&:active": { transform: "scale(0.97)" },
                   "& .MuiTouchRipple-child": { backgroundColor: "#69E4DA" },
@@ -138,6 +177,20 @@ export default function Header() {
                 <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 600 }} />
               </ListItemButton>
             ))}
+
+            <Divider sx={{ my: 1 }} />
+
+            <ListItemButton
+              onClick={logout}
+              sx={{
+                mx: 1,
+                borderRadius: 2,
+                color: TEAL_DARK,
+                "&:hover": { background: "rgba(105,228,218,0.35)" },
+              }}
+            >
+              <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 700 }} />
+            </ListItemButton>
           </List>
         </Box>
       </Drawer>

@@ -1,37 +1,24 @@
-
 import { useEffect } from "react";
 import { Box } from "@mui/material";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 import Header from "../components/Header";
 
 export default function MainLayout() {
+  const { pathname } = useLocation();
+  const hideHeader = pathname === "/";
 
   // Cursor and touch-following effect
   useEffect(() => {
     const handlePointerMove = (event) => {
-      document.documentElement.style.setProperty(
-        "--cursor-x",
-        `${event.clientX}px`
-      );
-
-      document.documentElement.style.setProperty(
-        "--cursor-y",
-        `${event.clientY}px`
-      );
+      document.documentElement.style.setProperty("--cursor-x", `${event.clientX}px`);
+      document.documentElement.style.setProperty("--cursor-y", `${event.clientY}px`);
     };
 
-    window.addEventListener(
-      "pointermove",
-      handlePointerMove,
-      { passive: true }
-    );
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
 
     return () => {
-      window.removeEventListener(
-        "pointermove",
-        handlePointerMove
-      );
+      window.removeEventListener("pointermove", handlePointerMove);
     };
   }, []);
 
@@ -43,9 +30,8 @@ export default function MainLayout() {
         position: "relative",
       }}
     >
-      <Header />
+      {!hideHeader && <Header />}
       <Outlet />
     </Box>
   );
 }
-
